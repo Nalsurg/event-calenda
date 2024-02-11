@@ -59,12 +59,14 @@ def create_event(request):
     form = EventForm(request.POST or None)
     if request.POST and form.is_valid():
         title = form.cleaned_data["title"]
+        resourceId = form.cleaned_data["resourceId"]
         description = form.cleaned_data["description"]
         start_time = form.cleaned_data["start_time"]
         end_time = form.cleaned_data["end_time"]
         Event.objects.get_or_create(
             user=request.user,
             title=title,
+            resourceId=resourceId,
             description=description,
             start_time=start_time,
             end_time=end_time,
@@ -75,8 +77,14 @@ def create_event(request):
 
 class EventEdit(generic.UpdateView):
     model = Event
-    fields = ["title", "description", "start_time", "end_time"]
+    fields = ["title", "resourceId", "description", "start_time", "end_time"]
     template_name = "event.html"
+
+class EventDeleteView(generic.DeleteView):
+    model = Event
+    template_name = "event_confirm_delete.html"
+    success_url = reverse_lazy("calendarapp:calendar")
+
 
 
 @login_required(login_url="signup")
@@ -124,9 +132,11 @@ class CalendarViewNew(LoginRequiredMixin, generic.View):
         for event in events:
             event_list.append(
                 {
+                    "id": event.id,
+                    "resourceId": event.resourceId,
+                    "start": event.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                    "end": event.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
                     "title": event.title,
-                    "start": event.start_time.date().strftime("%Y-%m-%dT%H:%M:%S"),
-                    "end": event.end_time.date().strftime("%Y-%m-%dT%H:%M:%S"),
                 }
             )
         context = {"form": forms, "events": event_list, "events_month": events_month}

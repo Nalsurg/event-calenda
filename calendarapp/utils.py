@@ -9,8 +9,8 @@ class Calendar(HTMLCalendar):
         self.month = month
         super(Calendar, self).__init__()
 
-    # formats a day as a td
-    # filter events by day
+    # formats a day as a td # форматирует день как td
+    # filter events by day  # фильтровать события по дням
     def formatday(self, day, events):
         events_per_day = events.filter(start_time__day=day)
         d = ""
@@ -20,15 +20,15 @@ class Calendar(HTMLCalendar):
             return f"<td><span class='date'>{day}</span><ul> {d} </ul></td>"
         return "<td></td>"
 
-    # formats a week as a tr
+    # formats a week as a tr  форматирует неделю как tr
     def formatweek(self, theweek, events):
         week = ""
         for d, weekday in theweek:
             week += self.formatday(d, events)
         return f"<tr> {week} </tr>"
 
-    # formats a month as a table
-    # filter events by year and month
+    # formats a month as a table форматирует месяц как таблицу
+    # filter events by year and month фильтровать события по году и месяцу
     def formatmonth(self, withyear=True):
         events = Event.objects.filter(
             start_time__year=self.year, start_time__month=self.month

@@ -1,3 +1,5 @@
+<!-- он же event new и event edit
+ -->
 {% extends 'base.html' %}
 
 {% block title %}
@@ -7,6 +9,7 @@ Event
 {% block content %}
 <div class="clearfix">
   <a class="btn btn-info left" href="{% url 'calendarapp:calendar' %}"> Calendar </a>
+  <a class="btn btn-info right mr-2" href="{% url 'calendarapp:event-detail' event.pk %}"> Edit Detail </a>
 </div>
 
 <form method="post">

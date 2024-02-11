@@ -4,7 +4,7 @@ from calendarapp.models import Event
 
 
 class AllEventsListView(ListView):
-    """ All event list views """
+    """ Все просмотры списка событий """
 
     template_name = "calendarapp/events_list.html"
     model = Event
@@ -14,7 +14,7 @@ class AllEventsListView(ListView):
 
 
 class RunningEventsListView(ListView):
-    """ Running events list view """
+    """ Представление списка запущенных событий """
 
     template_name = "calendarapp/events_list.html"
     model = Event

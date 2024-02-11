@@ -27,8 +27,11 @@
                     {% for event in events_month %}
                       <div class="fc-event">
                           <h3>{{ event.title }}</h3>
+                          <p>{{ event.id }}</p>
+                          <p>{{ event.resourceId }}</p>
                           <p>From: {{ event.start_time }}</p>
                           <p>To: {{ event.end_time }}</p>
+                          <a class="btn btn-info right mr-2" href="{% url 'calendarapp:delete_event' event.pk %}"> Delete Event </a>
                       </div>
                     {% empty %}
                       <p>No Running Events Found</p>
@@ -54,6 +57,10 @@
                                 <div class="form-group">
                                     <label for="recipient-name" class="col-form-label">Event Title:</label>
                                     {{ form.title }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="recipient-name" class="col-form-label">Номер Кабинета</label>
+                                    {{ form.resourceId }}
                                 </div>
                                 <div class="form-group">
                                     <label for="message-text" class="col-form-label">Description:</label>
@@ -82,24 +89,45 @@
 {% endblock content %}
 
 {% block extrascripts %}
-  <script src="{% static 'calender/main.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@5.11.3/main.min.js"> //изменил путь к скрипту так как старый не работал
+  </script>
+  <script src="{% static 'calender/locales/ru.js' %}"></script>
   <script>
       document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
         var today = new Date();
 
         var calendar = new FullCalendar.Calendar(calendarEl, {
+          locale: 'ru',
+          initialView: 'resourceTimeGridFourDay',
+          navLinks: true,
+          nowIndicator: true,
+          datesAboveResources: true, // меняет местами     дату с ресурсами
           headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay,list'
+            right: 'resourceTimeGridDay,resourceTimeGridFourDay,resourceTimeGridWeek,dayGridMonth'
           },
+          timeZone: 'local',
           initialDate: today,
           navLinks: true, // can click day/week names to navigate views
           selectable: true,
+          // height: 'auto', // активирует stickyHeaderDates автоматически!
+          // slotDuration: '00:15:00', // очень маленькие слоты сделают календарь очень высоким
+          dayMinWidth: 150, // вызовет горизонтальные полосы прокрутки    
           selectMirror: true,
           select: function(arg) {
-            console.log('clicked')
+            console.log(arg.resource.id,);  
+            var startTime = arg.startStr.slice(0, 19);
+            var endTime = arg.endStr.slice(0, 19);
+            var resId = arg.resource.id
+            var inputStartDatetime = document.getElementById("startDateTime");
+            var inputEndDatetime = document.getElementById("endDateTime");
+            inputStartDatetime.setAttribute('value', startTime)
+            inputEndDatetime.setAttribute('value', endTime)
+            var inputResId = document.getElementById("resourceId");
+            inputResId.setAttribute('value', resId)
+
             var modal = document.getElementById('eventModal')
             modal.style.display = 'block'
             calendar.unselect()
@@ -112,34 +140,46 @@
           // bangladesh Holidays
           // events: 'bn.bd#holiday@group.v.calendar.google.com',
           eventClick: function(arg) {
-            if (confirm('Are you sure you want to delete this event?')) {
-              arg.event.remove()
-            }
+            return location.href="/event/"+arg.event.id+"/details/"
           },
           editable: true,
           dayMaxEvents: true, // allow "more" link when too many events
+          views: {
+            resourceTimeGridFourDay: {
+              type: 'resourceTimeGrid',
+              duration: { days: 4 },
+              buttonText: '4 days',
+            },
+          },
+                  resources: [
+    {
+      id: 'Кабинет 1',
+      title: 'Кабинет 1',
+      eventColor: 'orange',
+      businessHours: {
+        startTime: '9:00',
+        endTime: '18:00'
+      }
+    },
+    {
+      id: 'Кабинет 2',
+      title: 'Кабинет 2',
+      eventColor: 'green',
+      businessHours: {
+        startTime: '9:00',
+        endTime: '15:00',
+        daysOfWeek: [ 1, 3, 5 ] // Mon,Wed,Fri
+      }
+    }
+  ],
           events: {{ events|safe }},
-          // events: [
-          //   {
-          //     title: 'All Day Event',
-          //     start: '2021-06-26'
-          //   },
-          //   {
-          //     groupId: 999,
-          //     title: 'Repeating Event',
-          //     start: '2020-09-16T16:00:00'
-          //   },
-          //   {
-          //     title: 'Conference',
-          //     start: '2020-09-11',
-          //     end: '2020-09-13'
-          //   },
-          //   {
-          //     title: 'Click for Google',
-          //     url: 'http://google.com/',
-          //     start: '2020-09-28'
-          //   }
-          // ]
+      //     events: [
+      //   { resourceId: 'a', start: '2022-09-06', end: '2022-09-08', title: 'event 1' },
+      //   { resourceId: 'a', start: '2022-09-07T09:00:00', end: '2022-09-07T14:00:00', title: 'event 2' },
+      //   { resourceId: 'b', start: '2022-09-07T12:00:00', end: '2022-09-08T06:00:00', title: 'event 3' },
+      //   { resourceId: 'a', start: '2022-09-07T07:30:00', end: '2022-09-07T09:30:00', title: 'event 4' },
+      //   { resourceId: 'b', start: '2022-09-07T10:00:00', end: '2022-09-07T15:00:00', title: 'event 5' }
+      // ],
         });
 
         calendar.render();

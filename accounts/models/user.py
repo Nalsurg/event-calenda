@@ -8,42 +8,42 @@ from django.utils.translation import gettext_lazy as _
 
 
 class UserManager(BaseUserManager):
-    """ User manager """
+    """ Менеджер пользователей """
 
     def _create_user(self, email, password=None, **extra_fields):
-        """Creates and returns a new user using an email address"""
-        if not email:  # check for an empty email
+        """Создает и возвращает нового пользователя, используя адрес электронной почты"""
+        if not email:  # проверить наличие пустой электронной почты
             raise AttributeError("User must set an email address")
         else:  # normalizes the provided email
             email = self.normalize_email(email)
 
-        # create user
+        # Создать пользователя
         user = self.model(email=email, **extra_fields)
-        user.set_password(password)  # hashes/encrypts password
-        user.save(using=self._db)  # safe for multiple databases
+        user.set_password(password)  # хеширует/шифрует пароль
+        user.save(using=self._db)  # безопасно для нескольких баз данных
         return user
 
     def create_user(self, email, password=None, **extra_fields):
-        """Creates and returns a new user using an email address"""
+        """Создает и возвращает нового пользователя, используя адрес электронной почты"""
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
         return self._create_user(email, password, **extra_fields)
 
     def create_staffuser(self, email, password=None, **extra_fields):
-        """Creates and returns a new staffuser using an email address"""
+        """Создает и возвращает нового штатного пользователя, используя адрес электронной почты"""
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", False)
         return self._create_user(email, password, **extra_fields)
 
     def create_superuser(self, email, password=None, **extra_fields):
-        """Creates and returns a new superuser using an email address"""
+        """Создает и возвращает нового суперпользователя, используя адрес электронной почты"""
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         return self._create_user(email, password, **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    """ Custom user model """
+    """ Пользовательская модель пользователя """
 
     email = models.EmailField(
         _("Email Address"),
